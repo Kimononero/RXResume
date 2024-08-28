@@ -29,47 +29,46 @@ const Header = () => {
   const basics = useArtboardStore((state) => state.resume.basics);
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-2 pb-2 text-center">
-      <Picture />
-
-      <div>
-        <div className="text-2xl font-bold">{basics.name}</div>
-        <div className="text-base">{basics.headline}</div>
+    <div className="flex justify-between items-center pb-4">
+      <div className="flex items-center">
+        <div className="overflow-hidden mr-4">
+          <Picture/>
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold">{basics.name}</h1>
+          <h2 className="text-xl text-gray-600">{basics.headline}</h2>
+        </div>
       </div>
-
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm">
-        {basics.location && (
-          <div className="flex items-center gap-x-1.5">
-            <i className="ph ph-bold ph-map-pin text-primary" />
-            <div>{basics.location}</div>
-          </div>
-        )}
-        {basics.phone && (
-          <div className="flex items-center gap-x-1.5">
-            <i className="ph ph-bold ph-phone text-primary" />
-            <a href={`tel:${basics.phone}`} target="_blank" rel="noreferrer">
-              {basics.phone}
-            </a>
-          </div>
-        )}
+      <div className="text-right">
         {basics.email && (
-          <div className="flex items-center gap-x-1.5">
-            <i className="ph ph-bold ph-at text-primary" />
-            <a href={`mailto:${basics.email}`} target="_blank" rel="noreferrer">
+          <div>
+            <a href={`mailto:${basics.email}`} className="text-primary">
               {basics.email}
             </a>
           </div>
         )}
-        <Link url={basics.url} />
+        {basics.phone && (
+          <div>
+            <a href={`tel:${basics.phone}`} className="text-primary">
+              {basics.phone}
+            </a>
+          </div>
+        )}
+        {basics.url && (
+          <div>
+            <a href={basics.url.href} target="_blank" rel="noreferrer" className="text-primary">
+              {basics.url.label || basics.url.href}
+            </a>
+          </div>
+        )}
         {basics.customFields.map((item) => (
-          <div key={item.id} className="flex items-center gap-x-1.5">
-            <i className={cn(`ph ph-bold ph-${item.icon}`, "text-primary")} />
+          <div key={item.id}>
             {isUrl(item.value) ? (
-              <a href={item.value} target="_blank" rel="noreferrer noopener nofollow">
-                {item.name || item.value}
+              <a href={item.value} target="_blank" rel="noreferrer" className="text-primary">
+                {item.name}: {item.value}
               </a>
             ) : (
-              <span>{[item.name, item.value].filter(Boolean).join(": ")}</span>
+              <span>{item.name}: {item.value}</span>
             )}
           </div>
         ))}
@@ -231,7 +230,14 @@ const Section = <T,>({
                 {level !== undefined && level > 0 && <Rating level={level} />}
 
                 {keywords !== undefined && keywords.length > 0 && (
-                  <p className="text-sm">{keywords.join(", ")}</p>
+                  <div className="text-sm">
+                    {keywords.map((keyword, index) => (
+                      <React.Fragment key={index}>
+                        {keyword}
+                        {index < keywords.length - 1 && <br />}
+                      </React.Fragment>
+                    ))}
+                  </div>
                 )}
 
                 {url !== undefined && section.separateLinks && <Link url={url} />}
@@ -426,9 +432,9 @@ const Languages = () => {
   const section = useArtboardStore((state) => state.resume.sections.languages);
 
   return (
-    <Section<Language> section={section} levelKey="level">
+    <Section<Language> section={section}>
       {(item) => (
-        <div>
+        <div className="grid grid-cols-2 gap-x-4">
           <div className="font-bold">{item.name}</div>
           <div>{item.description}</div>
         </div>
@@ -564,10 +570,10 @@ export const Azurill = ({ columns, isFirstPage = false }: TemplateProps) => {
   const [main, sidebar] = columns;
 
   return (
-    <div className="p-custom space-y-3">
+    <div className="p-custom space-y-6">
       {isFirstPage && <Header />}
 
-      <div className="grid grid-cols-3 gap-x-4">
+      <div className="grid grid-cols-3 gap-x-12">
         <div className="sidebar group space-y-4">
           {sidebar.map((section) => (
             <Fragment key={section}>{mapSectionToComponent(section)}</Fragment>
