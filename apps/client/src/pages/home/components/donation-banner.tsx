@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 export const DonationBanner = () => (
   <motion.a
-    href="https://opencollective.com/Reactive-Resume"
+    href=""
     target="_blank"
     whileHover={{ height: 48 }}
     initial={{ opacity: 0, y: -50, height: 32 }}
@@ -14,8 +14,7 @@ export const DonationBanner = () => (
   >
     <HandHeart weight="bold" size={14} className="shrink-0" />
     <span>
-      If this project has helped you, please consider donating to Reactive Resume as we're running
-      out of server resources with the increasing number of users.
+      This project is in development and aim toward a non lucrative activity!
     </span>
   </motion.a>
 );

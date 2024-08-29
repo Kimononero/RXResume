@@ -109,10 +109,9 @@ export const ProfileSettings = () => {
                       <a
                         target="_blank"
                         rel="noopener noreferrer nofollow"
-                        href="https://translate.rxresu.me/"
                         className="font-medium underline underline-offset-2"
                       >
-                        Help translate the app.
+                        kimmy@dev.com.
                       </a>
                     </Trans>
                   </span>

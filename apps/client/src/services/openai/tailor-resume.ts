@@ -70,67 +70,75 @@ const singleWordHardSkills = [
 
 export const tailorResume = async (resume: any, jobDescription: string) => {
   const initialPrompt = `
-    Tailor IN ENGLISH the following resume STRICTLY to this job description: "${jobDescription}"
+  Tailor IN ENGLISH the following resume STRICTLY to this job description: "${jobDescription}"
 
-    Current resume:
-    ${JSON.stringify(resume, null, 2)}
+  Current resume:
+  ${JSON.stringify(resume, null, 2)}
 
-    Provide a JSON object with this structure, following these STRICT rules:
-    {
-      "basics": {
-        "headline": "TAILORED headline matching the job description exactly"
+  Provide a JSON object with this structure, following these STRICT rules:
+  {
+    "basics": {
+      "headline": "TAILORED headline matching the job description exactly"
+    },
+    "sections": {
+      "summary": {
+        "content": "TAILORED summary (2 sentences MAX). If original is "<p></p>", LEAVE "<p></p>"."
       },
-      "sections": {
-        "summary": {
-          "content": "TAILORED summary (2 sentences MAX). If original is "<p></p>", LEAVE "<p></p>"."
-        },
-        "skills": {
-          "items": [
-            {
-              "name": "Soft Skills",
-              "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
-            },
-            {
-              "name": "Hard Skills",
-              "keywords": ["tool1", "tool2", "tool3", "tool4", "tool5"]
-            }
-          ]
-        },
-        "experience": {
-          "items": [
-            {
-              "summary": "<p>Bullet point 1</p><p>Bullet point 2</p><p>Bullet point 3</p><p>Bullet point 4</p><p>Bullet point 5</p>"
-            },
-            // ... for EACH experience item, ensure it's tailored
-          ]
-        }
+      "skills": {
+        "items": [
+          {
+            "name": "Soft Skills",
+            "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
+          },
+          {
+            "name": "Hard Skills",
+            "keywords": ["tool1", "tool2", "tool3", "tool4", "tool5"]
+          }
+        ]
+      },
+      "experience": {
+        "items": [
+          {
+            "summary": "<p>Bullet point 1</p><p>Bullet point 2</p><p>Bullet point 3</p><p>Bullet point 4</p><p>Bullet point 5</p>"
+          },
+          // ... for EACH experience item, ensure it's tailored
+        ]
       }
     }
+  }
 
-    CRITICAL INSTRUCTIONS:
-    1. Use ONLY information from the original resume. DO NOT invent or add new information.
-    2. The headline MUST be a job title ONLY (e.g., "Product Manager", "Junior Developer"). NO additional descriptions.
-    3. If the original summary is empty, the tailored summary MUST also be empty.
-    4. DO NOT modify the soft skills. Keep them exactly as they are in the original resume.
-    5. Hard skills will be handled separately, leave them as placeholders for now.
-    6. EACH experience summary MUST be specifically tailored to match the job description. This is MANDATORY for ALL experience items.
-    7. Format each bullet point in experience summaries wrapped in <p></p> tags.
-    8. Ensure all changes directly relate to the provided job description.
-    9. DOUBLE-CHECK that ALL experience summaries are tailored before returning the result.
-    10. Each experience summary should have a MAXIMUM of 5 bullet points.
+  CRITICAL INSTRUCTIONS:
+  1. Use ONLY information from the original resume. DO NOT invent or add new information.
+  2. The headline MUST be a job title ONLY (e.g., "Product Manager", "Junior Developer"). NO additional descriptions.
+  3. If the original summary is empty, the tailored summary MUST also be empty.
+  4. DO NOT modify the soft skills. Keep them exactly as they are in the original resume.
+  5. Hard skills will be handled separately, leave them as placeholders for now.
+  6. EACH experience summary MUST be specifically tailored to match the job description and the actual role held. This is MANDATORY for ALL experience items.
+  7. Format each bullet point in experience summaries wrapped in <p></p> tags.
+  8. Ensure all changes directly relate to the provided job description and the specific role in each experience item.
+  9. DOUBLE-CHECK that ALL experience summaries are tailored before returning the result.
+  10. Each experience summary should have a MAXIMUM of 5 bullet points.
+  11. Ensure ABSOLUTE UNIQUENESS of each bullet point across ALL experience items. No repetition of information or phrasing is allowed between different jobs.
+  12. Tailor each experience item to highlight DIFFERENT aspects of the job description that are relevant to that specific role. Each job should focus on unique contributions and skills that align with both the original role and the target job description.
+  13. DO NOT mention any company names in the experience summaries, focus solely on responsibilities and achievements.
+  14. Ensure that each tailored experience summary accurately reflects the duties of the original role while aligning with the target job description.
 
-    IMPORTANT: 
-    - Ensure that EVERY experience item is tailored, not just the first one.
-    - DO NOT modify soft skills under any circumstances.
-    - Ensure there is a maximum of 5 bullet points per experience item, each wrapped in <p></p> tags.
-  `;
+  IMPORTANT: 
+  - Ensure that EVERY experience item is tailored, not just the first one.
+  - DO NOT modify soft skills under any circumstances.
+  - Ensure there is a maximum of 5 bullet points per experience item, each wrapped in <p></p> tags.
+  - Each bullet point MUST provide unique information relevant to both the original role and the target job description, with NO overlap between different jobs.
+  - Before finalizing, review ALL experience items together to ensure there is NO repetition of information or phrasing across different jobs.
+  - STRICTLY AVOID mentioning any company names (including the target company) in the experience summaries.
+  - Maintain a strong focus on the actual responsibilities and achievements relevant to each role, ensuring they align with the target job description.
+`;
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
       const initialResult = await openai().chat.completions.create({
         messages: [{ role: "user", content: initialPrompt }],
-        model: "gpt-3.5-turbo-16k",
-        max_tokens: 8192,
+        model: "gpt-4o-mini-2024-07-18",
+        max_tokens: 8096,
         temperature: 0.7,
       });
 
@@ -138,7 +146,20 @@ export const tailorResume = async (resume: any, jobDescription: string) => {
         throw new Error(`OpenAI did not return any choices for tailoring your resume.`);
       }
 
-      const tailoredResume = JSON.parse(initialResult.choices[0].message.content ?? "{}");
+      let content = initialResult.choices[0].message.content ?? "{}";
+      
+      // Remove markdown formatting if present
+      content = content.replace(/```json\n|\n```/g, '');
+
+      // Attempt to parse the JSON
+      let tailoredResume;
+      try {
+        tailoredResume = JSON.parse(content);
+      } catch (parseError) {
+        console.error("Failed to parse JSON:", parseError);
+        console.log("Received content:", content);
+        throw new Error("Invalid JSON response from OpenAI");
+      }
 
       // Validate and format experience summaries
       const formattedExperience = tailoredResume.sections.experience.items.map((item: any) => {
@@ -166,7 +187,7 @@ export const tailorResume = async (resume: any, jobDescription: string) => {
       const hardSkillsResult = await openai().chat.completions.create({
         messages: [{ role: "user", content: hardSkillsPrompt }],
         model: "gpt-3.5-turbo-16k",
-        max_tokens: 2048,
+        max_tokens: 4096,
         temperature: 0.0,
       });
 

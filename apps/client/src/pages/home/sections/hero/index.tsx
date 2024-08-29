@@ -23,26 +23,25 @@ export const HeroSection = () => (
         whileInView={{ opacity: 1, x: 0 }}
       >
         <div className="hidden items-center gap-x-4 sm:flex">
-          <Badge>{t`Version 4`}</Badge>
+          <Badge>{t`Version 0`}</Badge>
 
           <a
-            href="https://docs.rxresu.me/overview/features"
             className={cn(buttonVariants({ variant: "link" }), "space-x-2 text-left")}
           >
-            <p>{t`What's new in the latest version`}</p>
-            <ArrowRight />
+            <p>{t`Work In Progress`}</p>
+            {/* <ArrowRight /> */}
           </a>
         </div>
 
         <div className="mt-10 space-y-2">
           <h6 className="text-base font-bold tracking-wide">{t`Finally,`}</h6>
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-            {t`A free and open-source resume builder`}
+            {t`An AI assisted Resume Builder`}
           </h1>
         </div>
 
         <p className="prose prose-base prose-zinc mt-6 text-lg leading-8 dark:prose-invert">
-          {t`A free and open-source resume builder that simplifies the process of creating, updating, and sharing your resume.`}
+          {t`An AI assisted Resume Builder that simplifies the process of creating, updating, and sharing your resume.`}
         </p>
 
         <div className="mt-10 flex items-center gap-x-8">
@@ -62,7 +61,7 @@ export const HeroSection = () => (
                 width={3600}
                 height={2078}
                 src="/screenshots/builder.jpg"
-                alt="Reactive Resume - Screenshot - Builder Screen"
+                alt="Resumate - Screenshot - Builder Screen"
                 className="w-[76rem] rounded-lg bg-background/5 shadow-2xl ring-1 ring-foreground/10"
               />
             </Tilt>
